@@ -85,7 +85,6 @@ const fetchProductBySku = async (sku) => {
             return;
         } else if (response.productVariants.edges.length === 0) {
             // If no active product is found, check for drafts
-            console.log(`Active SKU ${sku} not found. Checking drafts...`);
             const draftQuery = `
             {
                 products(first: 1, query: "sku:${sku} AND status:draft") {
@@ -129,7 +128,6 @@ const fetchProductBySku = async (sku) => {
             response = await shopify.graphql(draftQuery);
 
             if (response.products.edges.length === 0) {
-                console.log(`SKU ${sku} not found in drafts.`);
                 return false;
             } else {
                 return true;
@@ -138,7 +136,7 @@ const fetchProductBySku = async (sku) => {
             return true;
         }
     } catch (error) {
-        console.error('Error fetching product by SKU:', error);
+        console.error('Error fetching product by SKU');
         return false;
     }
 };

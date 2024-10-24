@@ -124,7 +124,6 @@ async function main(products) {
             const sku = product["SKU"];
     
             if (!sku) {
-                console.log('Missing SKU in product:', product);
                 continue;
             }
     

@@ -79,7 +79,6 @@ async function add_products(product) {
         }
 
         if (product['Inventory'] == 'OUT OF STOCK') {
-            console.log('Skipping out of stock product:', product['SKU'])
             return
         }
 
@@ -153,13 +152,12 @@ async function add_products(product) {
 
         try {
             const response = await shopify.product.create(new_product);
-            console.log(`Product created successfully! ${response.title}`);
         } catch (error) {
             if (error.extensions && error.extensions.code === 'THROTTLED') {
                 await handleRateLimit(error);
                 return add_products(product)
             } else {
-                console.error(`Error updating SKU ${sku}:`, error);
+                console.error(`Error updating SKU`);
             }
         }
         console.log('\n=========\n');

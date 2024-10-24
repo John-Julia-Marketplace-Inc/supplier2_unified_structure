@@ -125,8 +125,6 @@ const updateInventoryAndCost = async (sku, newQuantity, size, newCost, updateUni
                 const sizeOption = variant.title;
 
                 if (sizeOption == size) {
-                    console.log('Found SKU:', sku);
-
                     const inventoryItemId = variant.inventoryItem.id;
 
                     const current_qty = variant.inventoryItem.inventoryLevels.edges[0].node.available;
@@ -134,7 +132,7 @@ const updateInventoryAndCost = async (sku, newQuantity, size, newCost, updateUni
                     const availableDelta = parseInt(newQuantity) - parseInt(current_qty);
                     
                     if (availableDelta == 0 || availableDelta == '0') { 
-                        console.log(`No update needed for ${sku} size: ${size}`)
+                        console.log(`No update needed, the values are the same`)
                         break;
                     }
 
@@ -152,7 +150,6 @@ const updateInventoryAndCost = async (sku, newQuantity, size, newCost, updateUni
                         }
                         `;
                         await shopify.graphql(mutation);
-                        console.log(`Updated inventory for SKU ${sku}, Size ${size} to ${newQuantity}.`);
                     } else {
                         console.log(`No inventory level found for SKU ${sku}, Size ${size}.`);
                     }
@@ -180,11 +177,9 @@ const updateInventoryAndCost = async (sku, newQuantity, size, newCost, updateUni
                         const costUpdateResponse = await shopify.graphql(updateInventoryMutation, costVariables);
                         if (costUpdateResponse.inventoryItemUpdate.userErrors.length > 0) {
                             console.log(`User Errors:`, costUpdateResponse.inventoryItemUpdate.userErrors);
-                        } else {
-                            console.log(`Updated Inventory Item for SKU ${sku} with new cost:`, costUpdateResponse.inventoryItemUpdate.inventoryItem);
-                        }
+                        } 
                     } else {
-                        console.log(`Existing cost (${existingCost}) is the same as new cost (${newCost}). No update required.`);
+                        console.log(`No update required.`);
                     }
                 }
             }
@@ -216,12 +211,10 @@ async function updateInventoryFromFetchedCSV() {
         const unitCost = parseFloat(product['Unit Cost']).toFixed(2);  // "1663.2"
 
         if (!skuFull) {
-            console.log('Missing SKU FULL in product:', product);
             continue;
         }
 
         if (!sizeField || !quantityField) {
-            console.log('Missing size or quantity in product:', product);
             continue;
         }
 
@@ -229,7 +222,6 @@ async function updateInventoryFromFetchedCSV() {
         const quantities = quantityField.split(',');  // Split quantities into array ["1", "1"]
 
         if (sizes.length !== quantities.length) {
-            console.log(`Mismatch between sizes and quantities for SKU: ${skuFull}`);
             continue;
         }
 
@@ -239,7 +231,6 @@ async function updateInventoryFromFetchedCSV() {
             const quantity = parseInt(quantities[j]);
 
             if (!isNaN(quantity) && !isNaN(unitCost)) {
-                console.log(`Processing SKU: ${skuFull}, Size: ${size}, Qty: ${quantity}, Unit Cost: ${unitCost}`);
 
                 if (j == 0) {
                     await updateInventoryAndCost(skuFull, quantity, size, unitCost, true);
