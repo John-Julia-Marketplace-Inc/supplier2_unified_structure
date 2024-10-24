@@ -45,8 +45,7 @@ jobs:
             export LOGIN="${{ secrets.LOGIN }}"
             export PASSWORD="${{ secrets.PASSWORD }}"
             python /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/get_data.py \
-                        --filename "men_shoes.csv" --pages "1,5" "6,10" "11,15" "16,20"
-                        --urls "${{ secrets.MEN_SHOES }}" --n_collections=4 --collection="Men Shoes" --max_workers=4
+                        --filename "men_shoes.csv" --pages "1,5" "6,10" "11,15" "16,20" --urls "${{ secrets.MEN_SHOES }}" --n_collections=4 --collection="Men Shoes" --max_workers=4
             
 
       - name: Clean Data
