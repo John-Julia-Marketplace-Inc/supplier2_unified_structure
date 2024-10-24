@@ -45,54 +45,51 @@ jobs:
             export LOGIN="${{ secrets.LOGIN }}"
             export PASSWORD="${{ secrets.PASSWORD }}"
             python /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/get_data.py \
-                        --filename "men_shoes.csv" --pages "1,2"  --urls "${{ secrets.MEN_SHOES }}" --n_collections=1 --collection="Men Shoes" --max_workers=1
-
-# --filename "men_shoes.csv" --pages "1,5" "6,10" "11,15" "16,20" --urls "${{ secrets.MEN_SHOES }}" --n_collections=4 --collection="Men Shoes" --max_workers=4
-            
+                        --filename "men_shoes.csv" --pages "1,5" "6,10" "11,15" "16,20" --urls "${{ secrets.MEN_SHOES }}" --n_collections=4 --collection="Men Shoes" --max_workers=4
 
       - name: Clean Data
         run: |
             python /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/private_repo/clean_men_shoes.py --input_file "men_shoes.csv"
 
-    #   - name: Install Node.js dependencies 
-    #     run: npm install axios csv-parser dotenv shopify-api-node fs
+      - name: Install Node.js dependencies 
+        run: npm install axios csv-parser dotenv shopify-api-node fs
     
-    #   - name: Check existing SKUs
-    #     run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/check_existing_skus.js
-    #     env:
-    #         SHOP: ${{ secrets.SHOP }}
-    #         SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_SHOES }}
-    #         INFILE: 'private_repo/clean_data/men_shoes/to_create.csv'
-    #         OUTFILE: 'private_repo/clean_data/men_shoes/skus_to_add.csv'
+      - name: Check existing SKUs
+        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/check_existing_skus.js
+        env:
+            SHOP: ${{ secrets.SHOP }}
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_SHOES }}
+            INFILE: 'private_repo/clean_data/men_shoes/to_create.csv'
+            OUTFILE: 'private_repo/clean_data/men_shoes/skus_to_add.csv'
 
-    #   - name: Add new products
-    #     run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/add_products.js
-    #     env:
-    #         SHOP: ${{ secrets.SHOP }}
-    #         SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_SHOES }}
-    #         ALL_DATA_FILE: 'private_repo/clean_data/men_shoes/to_create.csv'
-    #         OUTFILE: 'private_repo/clean_data/men_shoes/skus_to_add.csv'
+      - name: Add new products
+        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/add_products.js
+        env:
+            SHOP: ${{ secrets.SHOP }}
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_SHOES }}
+            ALL_DATA_FILE: 'private_repo/clean_data/men_shoes/to_create.csv'
+            OUTFILE: 'private_repo/clean_data/men_shoes/skus_to_add.csv'
 
-    #   - name: Update products
-    #     run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/update_products.js
-    #     env:
-    #         SHOP: ${{ secrets.SHOP }}
-    #         SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_SHOES }}
-    #         TO_UPDATE: 'private_repo/clean_data/men_shoes/to_update.csv'
+      - name: Update products
+        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/update_products.js
+        env:
+            SHOP: ${{ secrets.SHOP }}
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_SHOES }}
+            TO_UPDATE: 'private_repo/clean_data/men_shoes/to_update.csv'
 
-    #   - name: Set inventory 0
-    #     run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/set_zero_inventory.js
-    #     env:
-    #         SHOP: ${{ secrets.SHOP }}
-    #         SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_SHOES }}
-    #         ZERO_INVENTORY: 'private_repo/clean_data/men_shoes/zero_inventory.csv'
+      - name: Set inventory 0
+        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/set_zero_inventory.js
+        env:
+            SHOP: ${{ secrets.SHOP }}
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_SHOES }}
+            ZERO_INVENTORY: 'private_repo/clean_data/men_shoes/zero_inventory.csv'
 
-    #   - name: Set inventory 0
-    #     run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/set_zero_inventory.js
-    #     env:
-    #         SHOP: ${{ secrets.SHOP }}
-    #         SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_SHOES }}
-    #         ZERO_INVENTORY: 'private_repo/clean_data/men_shoes/zero_inventory2.csv'
+      - name: Set inventory 0
+        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/set_zero_inventory.js
+        env:
+            SHOP: ${{ secrets.SHOP }}
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_SHOES }}
+            ZERO_INVENTORY: 'private_repo/clean_data/men_shoes/zero_inventory2.csv'
                         
       - name: Commit changes from update.py
         run: |
