@@ -370,8 +370,10 @@ def setup():
         folder = 'women_clothing'
     elif 'men_clothing' in filename or 'men_clothes' in filename:
         folder = 'men_clothing'
-    elif 'belts' in filename:
-        folder = 'belts'
+    elif 'women_belts' in filename:
+        folder = 'women_belts'
+    elif 'men_belts' in filename:
+        folder = 'men_belts'
     elif 'sunglasses' in filename:
         folder = 'sunglasses'
     elif 'bags':

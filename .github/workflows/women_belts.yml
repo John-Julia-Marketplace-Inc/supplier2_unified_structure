@@ -1,0 +1,107 @@
+name: Trigger Women Belts Pipeline
+
+on:
+  workflow_dispatch:  
+
+  schedule:
+    - cron: '0 */2 * * *'  
+
+jobs:
+  trigger-public-workflow:
+    runs-on: ubuntu-latest
+
+    permissions:
+        contents: write  
+        packages: write  
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+    
+      - name: Set up environment and run script with secrets
+        run: |
+            echo "Setting up environment variables"
+        env:
+            SUPPLIER_URL: ${{ secrets.SUPPLIER_URL }}
+            LOGIN: ${{ secrets.LOGIN }}
+            PASSWORD: ${{ secrets.PASSWORD }}
+
+      - name: Clone Private Repository
+        run: |
+          git clone https://${{ secrets.PROFILE_URL }}:${{secrets.PUBLIC_PAT}}@github.com/${{ secrets.PROFILE_URL_REPO }}.git private_repo
+     
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Python dependencies
+        run: pip install pandas requests lxml selenium argparse
+
+      - name: Scrape data
+        run: |
+            echo "Scraping data and generating CSV..."
+            export SUPPLIER_URL="${{ secrets.SUPPLIER_URL }}"
+            export LOGIN="${{ secrets.LOGIN }}"
+            export PASSWORD="${{ secrets.PASSWORD }}"
+            python /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/get_data.py \
+                        --filename "women_belts.csv" --pages "1,5" --urls "${{ secrets.WOMEN_BELTS }}" --n_collections=1 --collection="Women Shoes" --max_workers=1
+
+      - name: Clean Data
+        run: |
+            python /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/private_repo/clean_women_belts.py --input_file "women_belts.csv"
+
+      - name: Install Node.js dependencies 
+        run: npm install axios csv-parser dotenv shopify-api-node fs
+    
+      - name: Check existing SKUs
+        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/check_existing_skus.js
+        env:
+            SHOP: ${{ secrets.SHOP }}
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_women_belts }}
+            INFILE: 'private_repo/clean_data/women_belts/to_create.csv'
+            OUTFILE: 'private_repo/clean_data/women_belts/skus_to_add.csv'
+
+      - name: Add new products
+        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/add_products.js
+        env:
+            SHOP: ${{ secrets.SHOP }}
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_women_belts }}
+            ALL_DATA_FILE: 'private_repo/clean_data/women_belts/to_create.csv'
+            OUTFILE: 'private_repo/clean_data/women_belts/skus_to_add.csv'
+
+      - name: Update products
+        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/update_products.js
+        env:
+            SHOP: ${{ secrets.SHOP }}
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_women_belts }}
+            TO_UPDATE: 'private_repo/clean_data/women_belts/to_update.csv'
+
+      - name: Set inventory 0
+        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/set_zero_inventory.js
+        env:
+            SHOP: ${{ secrets.SHOP }}
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_women_belts }}
+            ZERO_INVENTORY: 'private_repo/clean_data/women_belts/zero_inventory.csv'
+
+      - name: Set inventory 0
+        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/set_zero_inventory.js
+        env:
+            SHOP: ${{ secrets.SHOP }}
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_women_belts }}
+            ZERO_INVENTORY: 'private_repo/clean_data/women_belts/zero_inventory2.csv'
+                        
+      - name: Commit changes from update.py
+        run: |
+            cd private_repo
+            git config --local user.name "GitHub Action"
+            git config --local user.email "action@github.com"
+            git pull origin master --no-edit
+            git add clean_data/women_belts/
+
+            # Commit changes if there are any
+            git diff --cached --quiet || git commit -m "Commit changes from update.py"
+
+            git push
+                         
+                          
