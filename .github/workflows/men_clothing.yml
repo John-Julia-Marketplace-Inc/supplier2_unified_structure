@@ -3,8 +3,8 @@ name: Trigger Men Clothes Pipeline
 on:
   workflow_dispatch:  
 
-#   schedule:
-#     - cron: '0 */3 * * *'  
+  schedule:
+    - cron: '0 */2 * * *'  
 
 jobs:
   trigger-public-workflow:
@@ -62,34 +62,34 @@ jobs:
             INFILE: 'private_repo/clean_data/men_clothing/to_create.csv'
             OUTFILE: 'private_repo/clean_data/men_clothing/skus_to_add.csv'
 
-    #   - name: Add new products
-    #     run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/add_products.js
-    #     env:
-    #         SHOP: ${{ secrets.SHOP }}
-    #         SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_CLOTHING }}
-    #         ALL_DATA_FILE: 'private_repo/clean_data/men_clothing/to_create.csv'
-    #         OUTFILE: 'private_repo/clean_data/men_clothing/skus_to_add.csv'
+      - name: Add new products
+        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/add_products.js
+        env:
+            SHOP: ${{ secrets.SHOP }}
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_CLOTHING }}
+            ALL_DATA_FILE: 'private_repo/clean_data/men_clothing/to_create.csv'
+            OUTFILE: 'private_repo/clean_data/men_clothing/skus_to_add.csv'
 
-    #   - name: Update products
-    #     run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/update_products.js
-    #     env:
-    #         SHOP: ${{ secrets.SHOP }}
-    #         SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_CLOTHING }}
-    #         TO_UPDATE: 'private_repo/clean_data/men_clothing/to_update.csv'
+      - name: Update products
+        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/update_products.js
+        env:
+            SHOP: ${{ secrets.SHOP }}
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_CLOTHING }}
+            TO_UPDATE: 'private_repo/clean_data/men_clothing/to_update.csv'
 
-    #   - name: Set inventory 0
-    #     run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/set_zero_inventory.js
-    #     env:
-    #         SHOP: ${{ secrets.SHOP }}
-    #         SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_CLOTHING }}
-    #         ZERO_INVENTORY: 'private_repo/clean_data/men_clothing/zero_inventory.csv'
+      - name: Set inventory 0
+        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/set_zero_inventory.js
+        env:
+            SHOP: ${{ secrets.SHOP }}
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_CLOTHING }}
+            ZERO_INVENTORY: 'private_repo/clean_data/men_clothing/zero_inventory.csv'
 
-    #   - name: Set inventory 0
-    #     run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/set_zero_inventory.js
-    #     env:
-    #         SHOP: ${{ secrets.SHOP }}
-    #         SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_CLOTHING }}
-    #         ZERO_INVENTORY: 'private_repo/clean_data/men_clothing/zero_inventory2.csv'
+      - name: Set inventory 0
+        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/set_zero_inventory.js
+        env:
+            SHOP: ${{ secrets.SHOP }}
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_CLOTHING }}
+            ZERO_INVENTORY: 'private_repo/clean_data/men_clothing/zero_inventory2.csv'
                         
       - name: Commit changes from update.py
         run: |
