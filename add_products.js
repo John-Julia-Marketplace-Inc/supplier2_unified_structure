@@ -62,7 +62,7 @@ const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const handleRateLimit = async (error) => {
     if (error.extensions && error.extensions.code === 'THROTTLED') {
-        const retryAfter = parseInt(error.extensions.retryAfter) || 2000; // Default wait time of 2 seconds if no retryAfter is provided
+        const retryAfter = parseInt(error.extensions.retryAfter) || 4000; // Default wait time of 2 seconds if no retryAfter is provided
         console.log(`Rate limited! Waiting for ${retryAfter} ms before retrying...`);
         await wait(retryAfter); // Wait for the time suggested by Shopify (or 2 seconds)
     } else {
