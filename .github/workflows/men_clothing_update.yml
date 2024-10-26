@@ -1,4 +1,4 @@
-name: Trigger Men Belts Pipeline (Update all pipeline)
+name: Trigger Men Clothing Pipeline (Update all pipeline)
 
 on:
   workflow_dispatch:  
