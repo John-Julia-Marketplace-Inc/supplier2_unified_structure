@@ -47,9 +47,9 @@ jobs:
         env:
             SHOP: ${{ secrets.SHOP }}
             SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_CLOTHING }}
-            ALL_DATA_FILE: 'private_repo/clean_data/men_clothing/to_create.csv'
+            ALL_DATA_FILE: 'private_repo/clean_data/men_clothing/clean_men_clothing.csv'
             OUTFILE: 'private_repo/clean_data/men_clothing/skus_to_add.csv'
-            
+
       - name: Commit changes from update.py
         run: |
             cd private_repo
