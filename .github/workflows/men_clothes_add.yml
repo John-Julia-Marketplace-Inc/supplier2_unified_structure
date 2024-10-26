@@ -17,14 +17,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-    
-      - name: Set up environment and run script with secrets
-        run: |
-            echo "Setting up environment variables"
-        env:
-            SUPPLIER_URL: ${{ secrets.SUPPLIER_URL }}
-            LOGIN: ${{ secrets.LOGIN }}
-            PASSWORD: ${{ secrets.PASSWORD }}
 
       - name: Clone Private Repository
         run: |
