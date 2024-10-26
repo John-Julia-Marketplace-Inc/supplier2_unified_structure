@@ -1,0 +1,33 @@
+name: Trigger Women Belts Pipeline (Update all pipeline)
+
+on:
+  workflow_dispatch:  
+
+  schedule:
+    - cron: '0 */10 * * *'  
+
+jobs:
+  trigger-public-workflow:
+    runs-on: ubuntu-latest
+
+    permissions:
+        contents: write  
+        packages: write  
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Clone Private Repository
+        run: |
+          git clone https://${{ secrets.PROFILE_URL }}:${{secrets.PUBLIC_PAT}}@github.com/${{ secrets.PROFILE_URL_REPO }}.git private_repo
+      
+      - name: Install Node.js dependencies 
+        run: npm install axios csv-parser dotenv shopify-api-node fs
+  
+      - name: Update products
+        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/update_products.js
+        env:
+            SHOP: ${{ secrets.SHOP }}
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_WOMEN_BELTS }}
+            TO_UPDATE: 'private_repo/clean_data/women_belts/clean_women_belts.csv'
