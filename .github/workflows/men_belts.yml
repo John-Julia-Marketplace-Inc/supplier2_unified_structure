@@ -59,7 +59,7 @@ jobs:
         env:
             SHOP: ${{ secrets.SHOP }}
             SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_WOMEN_BELTS }}
-            INFILE: 'private_repo/clean_data/men_belts/to_create.csv'
+            INFILE: 'private_repo/clean_data/men_belts/clean_men_belts.csv'
             OUTFILE: 'private_repo/clean_data/men_belts/skus_to_add.csv'
 
       - name: Add new products
@@ -67,7 +67,7 @@ jobs:
         env:
             SHOP: ${{ secrets.SHOP }}
             SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_WOMEN_BELTS }}
-            ALL_DATA_FILE: 'private_repo/clean_data/men_belts/to_create.csv'
+            ALL_DATA_FILE: 'private_repo/clean_data/men_belts/clean_men_belts.csv'
             OUTFILE: 'private_repo/clean_data/men_belts/skus_to_add.csv'
 
       - name: Update products
@@ -75,7 +75,7 @@ jobs:
         env:
             SHOP: ${{ secrets.SHOP }}
             SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_WOMEN_BELTS }}
-            TO_UPDATE: 'private_repo/clean_data/men_belts/to_update.csv'
+            TO_UPDATE: 'private_repo/clean_data/men_belts/clean_men_belts.csv'
 
       - name: Set inventory 0
         run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/set_zero_inventory.js
