@@ -133,7 +133,7 @@ const updateInventoryAndCost = async (sku, newQuantity, size, newCost, updateUni
                     
                     if (availableDelta == 0 || availableDelta == '0') { 
                         console.log(`No update needed, the values are the same`)
-                        break;
+                        continue;
                     }
 
                     const inventoryLevelId = variant.inventoryItem.inventoryLevels.edges[0].node.id;
@@ -153,7 +153,7 @@ const updateInventoryAndCost = async (sku, newQuantity, size, newCost, updateUni
                     } else {
                         console.log(`No inventory level found for SKU ${sku}, Size ${size}.`);
                     }
-                    break;
+                    continue;
                 }
             }
 

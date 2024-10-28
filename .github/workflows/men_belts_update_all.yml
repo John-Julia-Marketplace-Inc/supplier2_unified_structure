@@ -3,8 +3,8 @@ name: Trigger Men Belts Pipeline (Update all pipeline)
 on:
   workflow_dispatch:  
 
-  schedule:
-    - cron: '0 */10 * * *'  
+#   schedule:
+#     - cron: '0 */10 * * *'  
 
 jobs:
   trigger-public-workflow:
