@@ -4,7 +4,7 @@ on:
   workflow_dispatch:  
   
   schedule:
-    - cron: '0 */2 * * *'  
+    - cron: '0 */3 * * *'  
 jobs:
   trigger-public-workflow:
     runs-on: ubuntu-latest
@@ -37,45 +37,8 @@ jobs:
       - name: Install Python dependencies
         run: pip install pandas requests lxml selenium argparse
 
-      - name: Scrape data
-        run: |
-            echo "Scraping data and generating CSV..."
-            export SUPPLIER_URL="${{ secrets.SUPPLIER_URL }}"
-            export LOGIN="${{ secrets.LOGIN }}"
-            export PASSWORD="${{ secrets.PASSWORD }}"
-            python /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/get_data.py \
-                        --filename "men_clothing.csv" --pages '1,4' '5,9' '10,14' '15,19' '20,24' '25,30' --urls "${{ secrets.MEN_CLOTHING }}" --n_collections=6 --collection="Men Clothes" --max_workers=6
-
-      - name: Clean Data
-        run: |
-            python /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/private_repo/clean_men_clothing.py --input_file "men_clothing.csv"
-    
-      - name: Commit changes from update.py
-        run: |
-            cd private_repo
-            git config --local user.name "GitHub Action"
-            git config --local user.email "action@github.com"
-            git pull origin master --no-edit
-            git add clean_data/men_clothing/
-
-            # Commit changes if there are any
-            git diff --cached --quiet || git commit -m "Commit changes from update.py"
-
-            git push
-
-      - name: Install Node.js dependencies 
-        run: npm install axios csv-parser dotenv shopify-api-node fs
-      
-      - name: Iterate over the products
-        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/iterate_and_find.js
-        env:
-            SHOP: ${{ secrets.SHOP }}
-            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_CLOTHING }}
-            ITERATE_AND_FIND: 'private_repo/clean_data/men_clothing/clean_men_clothing.csv'
-            FOLDER: 'private_repo/clean_data/men_clothing/'
-
-      # - name: Preprocess data
-      #   run: python /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/preprocess.py --input_folder "private_repo/clean_data/men_clothing" --clean_file "clean_men_clothing.csv"
+      - name: Preprocess data
+        run: python /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/preprocess.py --input_folder "private_repo/clean_data/men_clothing" --clean_file "clean_men_clothing.csv"
 
     
       # - name: Check existing SKUs

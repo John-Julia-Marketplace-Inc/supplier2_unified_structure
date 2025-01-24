@@ -15,7 +15,7 @@ if __name__ == '__main__':
     input_folder = args.input_folder
     clean_file = args.clean_file
     
-    all_data = pd.read_csv(f'{input_folder}/{clean_file}.csv')
+    all_data = pd.read_csv(f'{input_folder}/{clean_file}')
     all_skus = pd.read_csv(f'{input_folder}/all_skus.csv')
     shopify_data = pd.read_csv(f'{input_folder}/shopify_data.csv')
     to_add_skus = pd.read_csv(f'{input_folder}/to_add.csv')
