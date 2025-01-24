@@ -54,7 +54,7 @@ if __name__ == '__main__':
     data = all_data[['SKU', 'Unit Cost']]
     shopify = shopify_data[['SKU', 'Unit Cost']]
     shopify.columns = data.columns
-    combined = shopify.merge(data, on='Sku Styleisnow', suffixes=('_shopify', '_supplier'))
+    combined = shopify.merge(data, on='SKU', suffixes=('_shopify', '_supplier'))
     combined[combined['Unit Cost_shopify'] != combined['Unit Cost_supplier']].to_csv(f'{input_folder}/different_costs.csv', index=False)
     
     
