@@ -1,10 +1,10 @@
-name: Trigger Men Belts Pipeline
+name: Men Belts Pipeline
 
 on:
   workflow_dispatch:  
 
-  # schedule:
-  #   - cron: '0 */2 * * *'  
+  schedule:
+    - cron: '0 */2 * * *'  
 
 jobs:
   trigger-public-workflow:
@@ -114,58 +114,3 @@ jobs:
             git push
     
          
-
-      # - name: Install Node.js dependencies 
-      #   run: npm install axios csv-parser dotenv shopify-api-node fs
-    
-      # - name: Check existing SKUs
-      #   run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/check_existing_skus.js
-      #   env:
-      #       SHOP: ${{ secrets.SHOP }}
-      #       SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_WOMEN_BELTS }}
-      #       INFILE: 'private_repo/clean_data/men_belts/to_create.csv'
-      #       OUTFILE: 'private_repo/clean_data/men_belts/skus_to_add.csv'
-
-      # # - name: Add new products
-      # #   run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/add_products.js
-      # #   env:
-      # #       SHOP: ${{ secrets.SHOP }}
-      # #       SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_WOMEN_BELTS }}
-      # #       ALL_DATA_FILE: 'private_repo/clean_data/men_belts/to_create.csv'
-      # #       OUTFILE: 'private_repo/clean_data/men_belts/skus_to_add.csv'
-
-      # - name: Update products
-      #   run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/update_products.js
-      #   env:
-      #       SHOP: ${{ secrets.SHOP }}
-      #       SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_WOMEN_BELTS }}
-      #       TO_UPDATE: 'private_repo/clean_data/men_belts/clean_men_belts.csv'
-
-      # - name: Set inventory 0
-      #   run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/set_zero_inventory.js
-      #   env:
-      #       SHOP: ${{ secrets.SHOP }}
-      #       SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_WOMEN_BELTS }}
-      #       ZERO_INVENTORY: 'private_repo/clean_data/men_belts/zero_inventory.csv'
-
-      # - name: Set inventory 0
-      #   run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/set_zero_inventory.js
-      #   env:
-      #       SHOP: ${{ secrets.SHOP }}
-      #       SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_WOMEN_BELTS }}
-      #       ZERO_INVENTORY: 'private_repo/clean_data/men_belts/zero_inventory2.csv'
-                        
-      # - name: Commit changes from update.py
-      #   run: |
-      #       cd private_repo
-      #       git config --local user.name "GitHub Action"
-      #       git config --local user.email "action@github.com"
-      #       git pull origin master --no-edit
-      #       git add clean_data/men_belts/
-
-      #       # Commit changes if there are any
-      #       git diff --cached --quiet || git commit -m "Commit changes from update.py"
-
-      #       git push
-                         
-                          
