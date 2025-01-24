@@ -36,8 +36,10 @@ if __name__ == '__main__':
         )
     all_data_expanded = all_data_expanded.explode(['Size', 'Qty'])
     
-    data_expanded = shopify_data[['SKU','Sizes','Qty']].assign(
-            Size=shopify_data['Sizes'].str.split(';'),
+    shopify_data.columns = ['SKU', 'Size', 'Qty', 'Unit Cost']
+    
+    data_expanded = shopify_data[['SKU','Size','Qty']].assign(
+            Size=shopify_data['Size'].str.split(';'),
             Qty=shopify_data['Qty'].str.split(';')
         )
 
