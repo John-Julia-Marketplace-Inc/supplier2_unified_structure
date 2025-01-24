@@ -3,8 +3,8 @@ name: Trigger Women Shoes Pipeline
 on:
   workflow_dispatch:  
 
-  # schedule:
-  #   - cron: '0 */2 * * *'  
+  schedule:
+    - cron: '0 */2 * * *'  
 
 jobs:
   trigger-public-workflow:
