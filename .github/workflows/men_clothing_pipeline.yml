@@ -1,4 +1,4 @@
-name: Get and preprocess men clothing
+name: Men clothing preprocess and run
 
 on:
   workflow_dispatch:  
