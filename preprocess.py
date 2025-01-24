@@ -27,7 +27,7 @@ if __name__ == '__main__':
     
     # get zero inventory products
     zero_inventory = all_skus[~all_skus['SKU'].isin(all_data['SKU'])]
-    zero_inventory.to_csv(f'{input_folder}/zero_inventory.csv', index=False)
+    zero_inventory.to_csv(f'{input_folder}/zero_inventory_shopify.csv', index=False)
     
     # get products to update
     all_data_expanded = all_data[['SKU', 'Size', 'Qty']].assign(

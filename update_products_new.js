@@ -29,7 +29,7 @@ async function fetch_csv_products() {
     const products = [];
     try {
         await pipeline(
-            fs.createReadStream('data/others_update_products.csv'),
+            fs.createReadStream('data/os_update.csv'),
             csv(),
             new stream.Writable({
                 objectMode: true,
@@ -61,6 +61,76 @@ const updateInventoryMutation = `
         }
     }
 `;
+
+const updateUnitCost = async(sku, newCost) => {
+    try {
+        const query = `
+        {
+            productVariants(first: 100, query: "sku:${sku}") {
+                edges {
+                    node {
+                        id
+                        title
+                        sku
+                        product {
+                            title
+                            id
+                            handle
+                        }
+                        price
+                        barcode
+                        inventoryItem {
+                            id
+                            unitCost {
+                                amount
+                                currencyCode
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        `;
+
+        const response = await shopify.graphql(query);
+        
+        if (response) {
+            let currCost = parseFloat(response.productVariants.edges[0].node.inventoryItem.unitCost.amount)
+            newCost = parseFloat(newCost)
+
+            console.log(`Current Cost: ${currCost}, New Cost: ${newCost}`)
+
+            if (currCost != newCost) {
+
+                const inventoryItemId = response.productVariants.edges[0].node.inventoryItem.id;
+
+                const costVariables = {
+                    id: inventoryItemId,
+                    input: {
+                        cost: newCost
+                    }
+                };
+
+                const costUpdateResponse = await shopify.graphql(updateInventoryMutation, costVariables);
+                if (costUpdateResponse.inventoryItemUpdate.userErrors.length > 0) {
+                    console.log(`User Errors:`, costUpdateResponse.inventoryItemUpdate.userErrors);
+                } else {
+                    console.log(`Updated Inventory Item for SKU ${sku} with new cost:`, costUpdateResponse.inventoryItemUpdate.inventoryItem);
+                }
+            }
+        } else {
+            console.log(`No product found for SKU ${sku}`);
+        }
+
+    } catch (error) {
+        if (error.extensions && error.extensions.code === 'THROTTLED') {
+            await handleRateLimit(error);
+            return updateUnitCost(sku, newCost); // Retry after waiting
+        } else {
+            console.error(`Error updating SKU ${sku}:`, error);
+        }
+    }
+};
 
 // Function to update inventory quantity and cost for a given SKU
 const updateInventoryQuantity = async (sku, size, newQuantity) => {
@@ -183,23 +253,14 @@ async function updateInventoryFromFetchedCSV() {
 
     for (const product of products) {
         const sku = product["SKU"];
-        const sizes = product["Size"].split(',');
-        const quantities = product["Qty"].split(',');
-        const unitCost = parseFloat(product["Unit Cost"]);
+        const sizes = product["Size"];
+        const quantities = product["Qty_supplier"];
 
-        if (sizes.length !== quantities.length) continue;
-
-        for (let i = 0; i < sizes.length; i++) {
-            const size = sizes[i];
-            const quantity = parseInt(quantities[i]);
-
-            await updateInventoryAndCost(sku, quantity, size, unitCost, updateCost);
-        }
+        await updateInventoryQuantity(sku, sizes, quantities);
         
     }
 
     console.log('Inventory update complete.');
 }
 
-// Run the update process
-updateInventoryFromFetchedCSV();
+updateInventoryFromFetchedCSV()
