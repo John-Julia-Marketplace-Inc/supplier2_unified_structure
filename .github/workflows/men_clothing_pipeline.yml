@@ -33,7 +33,18 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
+          
+      - name: Install Node.js dependencies 
+        run: npm install axios csv-parser dotenv shopify-api-node fs
 
+      - name: Iterate over the products
+        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/iterate_and_find.js
+        env:
+            SHOP: ${{ secrets.SHOP }}
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_CLOTHING }}
+            ITERATE_AND_FIND: 'private_repo/clean_data/men_clothing/clean_men_clothing.csv'
+            FOLDER: 'private_repo/clean_data/men_clothing/'
+        
       - name: Install Python dependencies
         run: pip install pandas requests lxml selenium argparse
 
