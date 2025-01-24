@@ -1,4 +1,4 @@
-name: Get and preprocess men clothing
+name: Men Clothing Pipeline (ALL IN ONE)
 
 on:
   workflow_dispatch:  
@@ -81,8 +81,37 @@ jobs:
         run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/update_products.js
         env:
             SHOP: ${{ secrets.SHOP }}
-            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN }}
-        
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_CLOTHING }}
+            TO_UPDATE: 'private_repo/clean_data/men_clothing/os_update_products.csv'
+
+
+      - name: Set inventory 0
+        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/set_zero_inventory.js
+        env:
+            SHOP: ${{ secrets.SHOP }}
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_CLOTHING }}
+            ZERO_INVENTORY: 'private_repo/clean_data/men_clothing/zero_inventory_shopify.csv'
+
+      - name: Update costs
+        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/update_costs.js
+        env:
+            SHOP: ${{ secrets.SHOP }}
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_MEN_CLOTHING }}
+            UPDATE_COSTS: 'private_repo/clean_data/men_clothing/different_costs.csv'
+
+      - name: Commit changes from update.py
+        run: |
+            cd private_repo
+            git config --local user.name "GitHub Action"
+            git config --local user.email "action@github.com"
+            git pull origin master --no-edit
+            git add clean_data/men_clothing/
+
+            # Commit changes if there are any
+            git diff --cached --quiet || git commit -m "Commit changes from update.py"
+
+            git push
+                          
 
     
       # - name: Check existing SKUs

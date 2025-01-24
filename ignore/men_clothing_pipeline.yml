@@ -3,8 +3,8 @@ name: Men clothing preprocess and run
 on:
   workflow_dispatch:  
   
-  schedule:
-    - cron: '0 */3 * * *'  
+  # schedule:
+  #   - cron: '0 */3 * * *'  
 jobs:
   trigger-public-workflow:
     runs-on: ubuntu-latest
