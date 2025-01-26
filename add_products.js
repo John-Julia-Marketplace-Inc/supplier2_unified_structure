@@ -1,9 +1,9 @@
 const fs = require('fs');
 const csv = require('csv-parser');
-const Shopify = require('shopify-api-node');
 // require('dotenv').config();
 const stream = require('stream');
 const { promisify } = require('util');
+const Shopify = require('shopify-api-node');
 
 const pipeline = promisify(stream.pipeline);
 
@@ -23,7 +23,7 @@ async function fetch_csv(filePath) {
                 write(product, encoding, callback) {
                     products.push(product);
                     callback();
-                }
+                },
             })
         );
     } catch (error) {
@@ -32,54 +32,44 @@ async function fetch_csv(filePath) {
     return products;
 }
 
-
 function create_variants(product) {
     const sizes = product["Size"] ? product["Size"].split(',') : [];
     const qtyDetails = product["Qty"] ? product["Qty"].split(',') : [];
+    const barcodes = product["Barcode"] ? product["Barcode"].split(',') : [];
 
     const variants = sizes.map((size, index) => ({
         option1: size,
         price: product["Retail Price"],
         compare_at_price: product["Compare To Price"],
-        sku: `${product["Supplier Sku"]}`,
+        sku: `${product["SKU"]}`,
         requires_shipping: true,
         inventory_quantity: parseInt(qtyDetails[index], 10) || 0,
         inventory_management: "shopify",
         inventory_policy: "deny",
+        barcode: barcodes[index] ? barcodes[index].trim() : '',
         taxable: true,
         cost: product["Unit Cost"],
-        
     }));
 
     return {
         option1: 'Size',  // Set the option name to "Size"
-        variants: variants
+        variants: variants,
     };
 }
 
-const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+async function add_products(products) {
+    console.log('Starting product creation...');
 
-const handleRateLimit = async (error) => {
-    if (error.extensions && error.extensions.code === 'THROTTLED') {
-        const retryAfter = parseInt(error.extensions.retryAfter) || 4000; // Default wait time of 2 seconds if no retryAfter is provided
-        console.log(`Rate limited! Waiting for ${retryAfter} ms before retrying...`);
-        await wait(retryAfter); // Wait for the time suggested by Shopify (or 2 seconds)
-    } else {
-        throw error; // If it's not a rate-limiting error, rethrow it
-    }
-};
-
-
-async function add_products(product) {
-    
-        if (!product["Product Title"]) {
-            console.error('Product title is undefined, skipping this product:', product);
-            return
+    for (const product of products) {
+        if (!product["Product Title"] || product['Clean Images'].length === 0) {
+            console.error('Product title is undefined OR missing images, skipping this product:', product['Sku Styleisnow']);
+            continue;
         }
 
         if (product['Inventory'] == 'OUT OF STOCK') {
-            return
+            console.log('Skipping out of stock product:', product['SKU'])
+            continue
         }
 
         const formattedTitle = product["Product Title"]
@@ -88,21 +78,9 @@ async function add_products(product) {
             .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
             .join(' ');
 
-        const handle = formattedTitle
-            .toLowerCase()
-            .replace(/\s+/g, '-');
+        const handle = formattedTitle.toLowerCase().replace(/\s+/g, '-');
 
         const { option1, variants } = create_variants(product);
-
-        const imageUrls = product["Clean Images"] ? product["Clean Images"].split(',') : [];
-        const images = imageUrls.map((url, index) => ({
-            src: url.trim(),
-            alt: formattedTitle,
-            position: index + 1
-        })).filter(image => image.src);
-
-        // Product Title,Vendor,SKU,Supplier Sku,Original Price,Retail Price,Compare To Price,Unit Cost,Year,
-        // Season,Size,Qty,Inventory,Product Category,Tags,Color detail,Color Supplier,Material,Country,Sizing Standard,Fit,Description
 
         const metafields = [
             { namespace: 'category', key: 'details', value: product['Material'], type: 'multi_line_text_field' },
@@ -110,81 +88,198 @@ async function add_products(product) {
             { namespace: 'custom', key: 'color', value: product['Color detail'], type: 'single_line_text_field' },
             { namespace: 'custom', key: 'color_detail', value: product['Color Supplier'], type: 'single_line_text_field' },
             { namespace: 'custom', key: 'season', value: product['Season'], type: 'single_line_text_field' },
+            { namespace: 'custom', key: 'dimensions', value: product['Dimensions'], type: 'single_line_text_field' },
             { namespace: 'custom', key: 'year', value: product['Year'], type: 'single_line_text_field' },
-            { namespace: 'custom', key: 'supplier_sku', value: product['SKU'], type: 'single_line_text_field' },
-            { namespace: 'custom', key: 'size_info', value: product['Sizing Standard'], type: 'single_line_text_field'},
-            { namespace: 'custom', key: 'fit', value: product['Fit'], type: 'single_line_text_field'}
+            { namespace: 'custom', key: 'bag_length', value: product['Bag length'], type: 'single_line_text_field' },
+            { namespace: 'custom', key: 'bag_height', value: product['Bag height'], type: 'single_line_text_field' },
+            { namespace: 'custom', key: 'bag_width', value: product['Bag width'], type: 'single_line_text_field' },
+            { namespace: 'custom', key: 'accessory_height', value: product['Accessory height'], type: 'single_line_text_field' },
+            { namespace: 'custom', key: 'accessory_length', value: product['Accessory length'], type: 'single_line_text_field' },
+            { namespace: 'custom', key: 'heel_height', value: product['Heel height'], type: 'single_line_text_field' },
+            { namespace: 'custom', key: 'fit', value: product['Fit'], type: 'single_line_text_field' },
+            { namespace: 'custom', key: 'size_info', value: product['Sizing Standard'], type: 'single_line_text_field'}
         ];
 
         const filteredMetafields = metafields.filter(metafield => metafield.value && metafield.value !== '0' && metafield.value !== 0 && metafield.value !== '-' );
 
-        const new_product = {
-            title: formattedTitle,
-            body_html: product["Description"] || "No description available.",
-            vendor: product["Vendor"],
-            handle: handle,
-            product_type: product["Product Category"],
-            published_scope: 'web',
-            tags: product['Tags'].split(','),
-            status: 'draft',
-            images: images,
-            options: [
-                {
-                    name: option1, 
-                    values: variants.map(variant => variant.option1)
-                }
-            ],
-            presentment_prices: {
-                presentment_prices: [{
-                    price: {
-                        currency_code: 'USD',
-                        amount: product['Retail Price']
-                    },
-                    compare_at_price: {
-                        currency_code: 'USD',
-                        amount: product['Compare to Price']
+
+        const mutation = `
+            mutation CreateProduct($input: ProductInput!) {
+                productCreate(input: $input) {
+                    product {
+                        id
+                        title
+                        handle
                     }
-                }]
+                    userErrors {
+                        field
+                        message
+                    }
+                }
+            }
+        `;
+
+        console.log(variants)
+
+        const variables = {
+            input: {
+                title: formattedTitle,
+                bodyHtml: product["Description"] || "No description available.",
+                productType: product["Tags"],
+                vendor: product["Vendor"],
+                handle: handle,
+                tags: product['Tags'].split(','),
+                status: 'DRAFT',
+                metafields: filteredMetafields,
+                options: ['Size'],
             },
-            variants: variants,
-            metafields: filteredMetafields
         };
 
+        console.log('Variables for Shopify mutation:', JSON.stringify(variables, null, 2));
+
         try {
-            const response = await shopify.product.create(new_product);
-        } catch (error) {
-            if (error.extensions && error.extensions.code === 'THROTTLED') {
-                await handleRateLimit(error);
-                return add_products(product)
+            const response = await shopify.graphql(mutation, variables);
+            console.log(response)
+
+            if (response.productCreate.userErrors.length > 0) {
+                console.error('Product creation errors:', response.productCreate.userErrors);
             } else {
-                console.error(`Error updating SKU`);
+                console.log(`Product created successfully: ${response.productCreate.product.title}`);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Upload media (images) after product creation
+                const productId = response.productCreate.product.id;
+                await upload_media(productId, product);
+
+                // Upload variants
+                console.log(`Product ID: ${productId}`);
+                await upload_variants(productId, variants);
+            }
+        } catch (error) {
+            console.error('Error creating product:', error);
+            if (error.response && error.response.body) {
+                console.error('Error details:', error.response.body);
             }
         }
-        console.log('\n=========\n');
-    
-}
-
-async function filter_products(products, nonExistentProducts) {
-    const nonExistentProductCodes = new Set(nonExistentProducts.map(p => p['SKU']));
-    return products.filter(product => nonExistentProductCodes.has(product["SKU"]));
-}
-
-async function main(to_add, non_existent) {
-    const productsToAdd = await fetch_csv(to_add);
-    const nonExistentProducts = await fetch_csv(non_existent);
-    const filteredProducts = await filter_products(productsToAdd, nonExistentProducts);
-
-    console.log('Number of products to add:', filteredProducts.length)
-    
-    for (const product of filteredProducts) {
-        await add_products(product)
     }
 }
 
-const all_data = process.env.ALL_DATA_FILE;
-const skus_to_add = process.env.OUTFILE;
+async function upload_variants(productId, variants) {
+    const mutation = `
+        mutation productVariantsBulkCreate(
+            $productId: ID!, 
+            $strategy: ProductVariantsBulkCreateStrategy, 
+            $variants: [ProductVariantsBulkInput!]!
+        ) {
+            productVariantsBulkCreate(productId: $productId, strategy: $strategy, variants: $variants) {
+                product {
+                    id
+                }
+                userErrors {
+                    field
+                    message
+                }
+            }
+        }
+    `;
 
-console.log('All data file:', all_data);
-console.log('Skus to add:', skus_to_add)
+    const variables = {
+        productId: productId, // Ensure this is correctly formatted as a Shopify GID
+        strategy: "REMOVE_STANDALONE_VARIANT",
+        variants: variants.map((variant) => ({
+            // title: variant.option1,
+            optionValues: [{
+                name: variant.option1,
+                optionName: 'Size'
+            }],
+            sku: variant.sku,
+            price: parseFloat(variant.price),
+            compareAtPrice: variant.compare_at_price ? parseFloat(variant.compare_at_price) : null,
+            taxable: true,
+            inventoryItem: {
+                cost: parseFloat(variant.cost) || null,
+                requiresShipping: true,
+                tracked: true,
+            },
+            inventoryQuantities: [
+                {
+                    locationId: process.env.LOCATION,
+                    availableQuantity: parseInt(variant.inventory_quantity, 10),
+                },
+            ],
+            inventoryPolicy: 'DENY',
+        })),
+    };
 
-main(all_data, skus_to_add);
+    try {
+        const response = await shopify.graphql(mutation, variables);
+        if (response.productVariantsBulkCreate.userErrors.length > 0) {
+            console.error('Product variants creation errors:', response.productVariantsBulkCreate.userErrors);
+        } else {
+            console.log(`Product variants created successfully for product ID: ${productId}`);
+        }
+    } catch (error) {
+        console.error('Error creating product variants:', error);
+        if (error.response && error.response.body) {
+            console.error('Error details:', error.response.body);
+        }
+    }
+}
+
+
+async function upload_media(productId, product) {
+    const imageUrls = product["Clean Images"] ? product["Clean Images"].split(',') : [];
+    const mediaInputs = imageUrls.map((url) => ({
+        alt: product["Product's Title"],
+        originalSource: url.trim(),
+    }));
+
+    const mutation = `
+        mutation productCreateMedia($media: [CreateMediaInput!]!, $productId: ID!) {
+            productCreateMedia(media: $media, productId: $productId) {
+                media {
+                    alt
+                    preview {
+                        image {
+                            originalSrc
+                        }
+                    }
+                }
+                userErrors {
+                    field
+                    message
+                }
+            }
+        }
+    `;
+
+    const variables = {
+        media: mediaInputs.map((media) => ({
+            mediaContentType: "IMAGE",
+            alt: media.alt,
+            originalSource: media.originalSource,
+        })),
+        productId,
+    };
+
+    try {
+        const response = await shopify.graphql(mutation, variables);
+        if (response.productCreateMedia.userErrors.length > 0) {
+            console.error('Media upload errors:', response.productCreateMedia.userErrors);
+        } else {
+            console.log(`Media uploaded successfully for product ID: ${productId}`);
+        }
+    } catch (error) {
+        console.error('Error uploading media:', error);
+        if (error.response && error.response.body) {
+            console.error('Error details:', error.response.body);
+        }
+    }
+}
+
+async function main(filePath) {
+    const productsToAdd = await fetch_csv(filePath);
+    await add_products(productsToAdd);
+}
+
+main(process.env.ADD_PRODUCTS);

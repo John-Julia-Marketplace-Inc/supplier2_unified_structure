@@ -25,6 +25,9 @@ if __name__ == '__main__':
     new_products[new_products['Size'] == 'OS'].to_csv(f'{input_folder}/os_add_products.csv', index=False)
     new_products[new_products['Size'] != 'OS'].to_csv(f'{input_folder}/others_add_products.csv', index=False)
     
+    skus = pd.concat([all_skus, to_add_skus], ignore_index=True)
+    skus.drop_duplicates().to_csv(f'{input_folder}/all_skus.csv', index=False)
+    
     # get zero inventory products
     zero_inventory = all_skus[~all_skus['SKU'].isin(all_data['SKU'])]
     zero_inventory.to_csv(f'{input_folder}/zero_inventory_shopify.csv', index=False)
