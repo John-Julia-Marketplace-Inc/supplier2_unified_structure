@@ -1,0 +1,47 @@
+name: Trigger Women Shoes Pipeline (ADD)
+
+on:
+  workflow_dispatch:  
+  
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  trigger-public-workflow:
+    runs-on: ubuntu-latest
+
+    permissions:
+        contents: write  
+        packages: write  
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Clone Private Repository
+        run: |
+          git clone https://${{ secrets.PROFILE_URL }}:${{secrets.PUBLIC_PAT}}@github.com/${{ secrets.PROFILE_URL_REPO }}.git private_repo
+
+      - name: Install Node.js dependencies 
+        run: npm install axios csv-parser dotenv shopify-api-node fs
+
+      - name: Add new products
+        run: node /home/runner/work/supplier2_unified_structure/supplier2_unified_structure/add_products.js
+        env:
+            SHOP: ${{ secrets.SHOP }}
+            SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN_WOMEN_SHOES }}
+            LOCATION: ${{ secrets.LOCATION }}
+            ADD_PRODUCTS: 'private_repo/clean_data/women_shoes/others_add_products.csv'
+
+      - name: Commit changes from update.py
+        run: |
+            cd private_repo
+            git config --local user.name "GitHub Action"
+            git config --local user.email "action@github.com"
+            git pull origin master --no-edit
+            git add clean_data/women_shoes/
+
+            # Commit changes if there are any
+            git diff --cached --quiet || git commit -m "Commit changes from update.py"
+
+            git push
