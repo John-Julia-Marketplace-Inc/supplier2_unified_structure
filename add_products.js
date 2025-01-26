@@ -119,8 +119,6 @@ async function add_products(products) {
             }
         `;
 
-        console.log(variants)
-
         const variables = {
             input: {
                 title: formattedTitle,
@@ -135,16 +133,13 @@ async function add_products(products) {
             },
         };
 
-        console.log('Variables for Shopify mutation:', JSON.stringify(variables, null, 2));
 
         try {
             const response = await shopify.graphql(mutation, variables);
-            console.log(response)
 
             if (response.productCreate.userErrors.length > 0) {
                 console.error('Product creation errors:', response.productCreate.userErrors);
             } else {
-                console.log(`Product created successfully: ${response.productCreate.product.title}`);
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
                 // Upload media (images) after product creation
@@ -152,7 +147,6 @@ async function add_products(products) {
                 await upload_media(productId, product);
 
                 // Upload variants
-                console.log(`Product ID: ${productId}`);
                 await upload_variants(productId, variants);
             }
         } catch (error) {
@@ -215,9 +209,7 @@ async function upload_variants(productId, variants) {
         const response = await shopify.graphql(mutation, variables);
         if (response.productVariantsBulkCreate.userErrors.length > 0) {
             console.error('Product variants creation errors:', response.productVariantsBulkCreate.userErrors);
-        } else {
-            console.log(`Product variants created successfully for product ID: ${productId}`);
-        }
+        } 
     } catch (error) {
         console.error('Error creating product variants:', error);
         if (error.response && error.response.body) {
@@ -266,9 +258,7 @@ async function upload_media(productId, product) {
         const response = await shopify.graphql(mutation, variables);
         if (response.productCreateMedia.userErrors.length > 0) {
             console.error('Media upload errors:', response.productCreateMedia.userErrors);
-        } else {
-            console.log(`Media uploaded successfully for product ID: ${productId}`);
-        }
+        } 
     } catch (error) {
         console.error('Error uploading media:', error);
         if (error.response && error.response.body) {
